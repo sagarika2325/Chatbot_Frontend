@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 
-
 import {
     Home,
     MessageSquare,
@@ -48,19 +47,31 @@ const ChatbotPanel = () => {
         setIsTyping(true);
 
         try {
-            const response = await fetch("https://chatbot-fastapi-central.azurewebsites.net/ask", {
+            // 1️⃣ Try FAQ first
+            const faqResponse = await fetch("https://chatbot-fastapi-central.azurewebsites.net/ask", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ question: userMessage }),
             });
 
-            const data = await response.json();
-            console.log("BOT RESPONSE:", data);
+            const faqData = await faqResponse.json();
+            const faqAnswer = faqData.answer?.trim();
 
-            setChatHistory((prev) => [
-                ...prev,
-                { sender: "bot", text: data.answer || "🤖 No response received." },
-            ]);
+            // 2️⃣ If FAQ doesn't help, fallback to OpenAI
+            let finalAnswer = faqAnswer;
+            if (!faqAnswer || /sorry.*do not know/i.test(faqAnswer)) {
+                const gptResponse = await fetch("https://chatbot-fastapi-central.azurewebsites.net/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question: userMessage }),
+                });
+
+                const gptData = await gptResponse.json();
+                finalAnswer = gptData.answer?.trim() || "🤖 Sorry, I couldn’t find an answer.";
+            }
+
+            setChatHistory((prev) => [...prev, { sender: "bot", text: finalAnswer }]);
+
         } catch (err) {
             console.error("Backend error:", err);
             setChatHistory((prev) => [
@@ -119,7 +130,6 @@ const ChatbotPanel = () => {
                         >
                             🌟 Join the Varmodel community and build with us!
                         </a>
-
                     </div>
                 );
 
@@ -217,12 +227,12 @@ const ChatbotPanel = () => {
                         className={`chatbot-tab ${activeTab === tab ? "active" : ""}`}
                         onClick={() => setActiveTab(tab)}
                     >
-                        {{
+                        {({
                             Home: <Home strokeWidth={1.5} size={20} />,
                             Messages: <MessageSquare strokeWidth={1.5} size={20} />,
                             News: <Newspaper strokeWidth={1.5} size={20} />,
                             Help: <Users strokeWidth={1.5} size={20} />,
-                        }[tab]}
+                        }[tab])}
                         <span>{activeTab === tab ? <strong>{tab}</strong> : tab}</span>
                     </div>
                 ))}
