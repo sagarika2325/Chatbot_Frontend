@@ -1,0 +1,44 @@
+/* Row layout for each message */
+.message-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+/* Align messages to the left (bot) or right (user) */
+.message-row.bot {
+  justify-content: flex-start;
+}
+
+.message-row.user {
+  justify-content: flex-end;
+}
+
+/* Spacer helps push user messages to the right */
+.spacer {
+  flex: 1;
+}
+
+/* Chat bubble style */
+.message-bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  max-width: 75%;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Bot bubble */
+.message-bubble.bot {
+  background-color: #f1f1f1;
+  color: #000;
+  align-self: flex-start;
+}
+
+/* User bubble */
+.message-bubble.user {
+  background-color: #d0efff;
+  color: #000;
+  align-self: flex-end;
+}
